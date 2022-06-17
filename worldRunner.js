@@ -20,6 +20,71 @@ var allNavis = [
 	{ name: 'WoodMan.EXE' }
 ]
 
+var ball = { place: MAX_SPACE / 2 }
+
+// todo: make this a class or something
+// sentanceStruct{ who: "", didWhat: "", how: "", how_much: "", when: ""}
+
+var textParser = {
+	textParse: function(navi, text, speaker = UnknownSpeakr, isDirect = false, tone = null) {
+		var sens = [];
+		var len = text.length;
+		var str = "";
+		var endRun = "";
+		text.forEach((c, i) => {
+			if (c == '.') {
+				// check if this is part of ...
+				if ((i > 0 && c[i-1] == '.') || (i < len - 1 && c[i+1] == '.')) {
+					str += c;
+				} else {
+					sens.push(str + " _ .")
+					str.length = 0;
+				}
+			} else if (c == '!' || c == '?') {
+				// check for non-terminal of run
+				if (i < len - 1 && (c[i+1] == '!' || c[i+1] == '?')) {
+					endRun += c;
+				} else {
+					sens.push(str + " " + (endRun == "" ? "_" : endRun) + " c")
+				}
+			}
+		});
+
+		this.sens = sens;
+		this.parsedSens = [];
+		this.naviM = navi.m;
+
+		sens.forEach(sen => { this.parsedSens.push(this.senParse(sen)) });
+	},
+
+	senParse: function() {
+		// if (startOfSenAnswersOpenQuestion()) {
+		// 	IExpectTo(answerOpenQuestionWithStartOfSen()); // ???
+		// } else {
+		// 	if (senBeginsWithAPersonsName()) {
+		// 		if (!(senUsesLinkingVerb())) senIsDirectedAt(personsNameAtSenBeginning());
+		// 	}
+		// }
+
+		var words = sentance.split(" "); // todo: remove last two
+		var wordRecs = words.map(word => {
+			return {
+				word: word,
+				coreWord: coreLookup(word)
+			}
+		});
+	}
+};
+
+function startsWithCaseInsensitive(subject, pattern) {
+	// not unicode safe
+	return subject.toLowerCase().startsWith(pattern.toLowerCase());
+}
+
+function findNaviByName(name) {
+	return allNavis.find(x => startsWithCaseInsensitive(x.name, name));
+}
+
 function distanceBetween(navi, other) {
 	return Math.abs(navi.space - other.space);
 }
@@ -136,7 +201,7 @@ function move(navi, towards = -99, slower = 0) {
 	var maxMoveSpaces = calcMaxMoveSpaces(navi);
 
 	var direction = towards;
-	if (direction == -99) { direction = TEAM_ATTACK_DIRECTION[navi.team_idx]; }
+	if (direction == -99) { direction = TEAM_ATTACK_DIRECTION[navi.teamIdx]; }
 	
 	var targetSpace = navi.space + maxMoveSpaces * direction;
 
@@ -157,13 +222,10 @@ function execMove(navi, vector) {
 
 	navi.space = navi.space + vector;
 
-	return navi.space - originalSpace;
-}
-
-
-
-var ball = {
-	place: MAX_SPACE / 2
+	var movedDistance = navi.space - originalSpace;
+	console.log(navi.name + " moved " + movedDistance + " to " + navi.space);
+	
+	return movedDistance;
 }
 
 function canIShootOnGoal(navi) {
@@ -223,6 +285,7 @@ function setupStartWords(navi) {
 	navi.m.words.nou.when = ["someday", "sometime", "before", "after", "during", "while", "until"];
 	navi.m.words.pre.person = ["he", "she", "they", "him", "her", "them", "his", "hers", "their", "theirs"];
 	navi.m.words.pre.thing = ["it", "its", "that", "this", "these", "those", "them", "they", "their", "theirs"]
+	// navi.m.words.pre.
 }
 
 function setupStarterPhrases(navi) {
@@ -257,10 +320,10 @@ function initializeAllNavis() {
 	allNavis.forEach((navi, i) => {
 		navi.nextRoundSecond = world.roundSeconds * (i+1.0)/allNavis.length;
 		// console.log("set " + navi.name + " round seconds to " + navi.nextRoundSecond)
-		navi.maxhp = 900;
+		navi.maxHp = 900; 
 		navi.hp = 900;
 		navi.space = MAX_SPACE / 2;
-		navi.team_idx = 0;
+		navi.teamIdx = 0;
 		navi.vel = 0;
 		navi.pow = 0;
 		navi.end = 0;
@@ -279,7 +342,16 @@ function initializeAllNavis() {
 	});
 }
 
-initializeAllNavis();
+function setupUniqueNaviTraits() {
+	metal = findNaviByName('metal');
+	air = findNaviByName('air');
+	bubble = findNaviByName('bubble');
+	quick = findNaviByName('quick');
+	crash = findNaviByName('crash');
+	flash = findNaviByName('flash');
+	heat = findNaviByName('heat');
+	wood = findNaviByName('wood');
+}
 
 function runAllNavis() {
 	allNavis.forEach(navi => {
@@ -298,4 +370,10 @@ function startWorld() {
 	return setInterval(worldEverySecond, 1000);
 }
 
-startWorld();
+function main() {
+	initializeAllNavis();
+	setupUniqueNaviTraits();
+	startWorld();
+}
+
+main();
