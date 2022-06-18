@@ -106,7 +106,9 @@ function doISee(navi, other) {
 }
 
 function execSay(navi, quote) {
-	console.log(navi.name + " says, \"" + quote + '"');
+	var last = quote.length > 0 ? quote[quote.length - 1] : ".";
+	var autoEnd = (last != "." && last != "?" && last != "!" && last != "_") ? "." : "";
+	console.log(navi.name + " says, \"" + quote + autoEnd + '"');
 	allNavis.forEach(other => {
 		if (canIHear(other, navi)) iHear(other, quote, navi);
 	})	
@@ -225,7 +227,8 @@ function execMove(navi, vector) {
 	navi.space = navi.space + vector;
 
 	var movedDistance = navi.space - originalSpace;
-	console.log(navi.name + " moved " + movedDistance + " to " + navi.space);
+	var reportDirection = movedDistance > 0 ? " left" : (movedDistance < 0 ? " right" : "")
+	console.log(navi.name + " moves " + Math.abs(movedDistance) + reportDirection + " to space " + navi.space + ".");
 
 	return movedDistance;
 }
