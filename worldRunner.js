@@ -1,3 +1,5 @@
+
+
 var world = { seconds: 0, roundSeconds: 60 };
 
 var METAL_TEAM_IDX = 0;
@@ -18,9 +20,9 @@ var allNavis = [
 	{ name: 'FlashMan.EXE' },
 	{ name: 'HeatMan.EXE' },
 	{ name: 'WoodMan.EXE' }
-]
+];
 
-var ball = { place: MAX_SPACE / 2 }
+var ball = { space: MAX_SPACE / 2 };
 
 // todo: make this a class or something
 // sentanceStruct{ who: "", didWhat: "", how: "", how_much: "", when: ""}
@@ -190,17 +192,17 @@ function calcMaxMoveSpaces(navi) {
 	// TODO: fix movement so that:
 	//		all but the very slowest navis can cross the whole field in a reasonable amount of time (target 20 minutes)
 	// 		all but the very slowest navis can easily get into combat range of each other and somewhat faster navis
+	// console.log("cMMS: " + (1 + ((navi.vel || -2) + 5)));
 	return 1 + ((navi.vel || -2) + 5);
 }
 
-function move(navi, towards = -99, slower = 0) {
+function move(navi, direction = -99, slower = 0) {
 	if (navi.rooted) return 0;
 
 	// todo: this method reads navi.space but really shoud be navi.m.space
 
 	var maxMoveSpaces = calcMaxMoveSpaces(navi);
 
-	var direction = towards;
 	if (direction == -99) { direction = TEAM_ATTACK_DIRECTION[navi.teamIdx]; }
 	
 	var targetSpace = navi.space + maxMoveSpaces * direction;
@@ -224,7 +226,7 @@ function execMove(navi, vector) {
 
 	var movedDistance = navi.space - originalSpace;
 	console.log(navi.name + " moved " + movedDistance + " to " + navi.space);
-	
+
 	return movedDistance;
 }
 
@@ -250,11 +252,11 @@ function act(navi) {
 		// with exec, which decide if the navi can truly do the thing,
 		// and then make it happen.
 		// Imagine this distinction:
-		// The true state of the world, e.g. hitpoints or places,
+		// The true state of the world, e.g. hitpoints or spaces,
 		// is always determined and set by another machine,
 		// we need to generate as text the command we will send to that machine
 		// which is the exec version of the function.
-		move(navi, ball);
+		move(navi);
 	} else {
 		;
 	}
