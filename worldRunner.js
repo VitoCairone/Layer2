@@ -5,9 +5,14 @@ var world = { seconds: 0, roundSeconds: 60 };
 var METAL_TEAM_IDX = 0;
 var WOOD_TEAM_IDX = 1;
 
-var TEAM_ATTACK_DIRECTION = [-1, 1];
-
 var MAX_SPACE = 256;
+
+						  // Metal, Wood
+var TEAM_ATTACK_DIRECTION = [-1, 1];
+var HEARTH_SPACES 		  = [248, 8];
+var OWN_GOAL_SPACES 	  = [240, 16];
+var TARGET_GOAL_SPACES    = [16, 240];
+var LAST_SHOOTER_SPACES	  = [17, 239];
 
 var UnknownSpeaker = { name: "???" };
 
@@ -22,7 +27,7 @@ var allNavis = [
 	{ name: 'WoodMan.EXE' }
 ];
 
-var ball = { space: MAX_SPACE / 2 };
+var ball = { space: MAX_SPACE / 2, navi: null };
 
 // todo: make this a class or something
 // sentanceStruct{ who: "", didWhat: "", how: "", how_much: "", when: ""}
@@ -190,30 +195,56 @@ function iHear(navi, quote, speaker = UnknownSpeaker, isDirect = false) {
 	navi.m.scene.people[speaker.name].said[quote] = true;
 }
 
-function calcMaxMoveSpaces(navi) {
-	// TODO: fix movement so that:
-	//		all but the very slowest navis can cross the whole field in a reasonable amount of time (target 20 minutes)
-	// 		all but the very slowest navis can easily get into combat range of each other and somewhat faster navis
-	// console.log("cMMS: " + (1 + ((navi.vel || -2) + 5)));
-	return 1 + ((navi.vel || -2) + 5);
+function calcHitrate(navi, other) {
+	var map = {"C": 0, "B": 1, "A": 2, "S": 3};
+	return 0.75*(1.0+0.085*(map[navi.accuracy] - map[other.dodging]));
 }
 
+function hasBall(navi) { return ball.navi === navi; }
+
+function calcMaxMoveSpaces(navi) {
+	var threeMinuteRoundMap = {
+		"E": 32,
+		"D": 42,
+		"C": 55,
+		"B": 77,
+		"A": 99,
+		"S": 128
+	};
+
+	var spaces = threeMinuteRoundMap[navi.priority];
+	if (hasBall(navi) && spaces > 60) {
+		spaces = 60;
+	}
+
+	return Math.round(spaces * world.roundSeconds / (3 * 60), 0);
+}
+
+function debug(x) { console.log(x); }
+
 function move(navi, direction = -99, slower = 0) {
+	// debug("move!!");
 	if (navi.rooted) return 0;
 
 	// todo: this method reads navi.space but really shoud be navi.m.space
 
 	var maxMoveSpaces = calcMaxMoveSpaces(navi);
+	// console.log("From = " + navi.space);
+	// console.log("mmS = " + maxMoveSpaces);
 
 	if (direction == -99) { direction = TEAM_ATTACK_DIRECTION[navi.teamIdx]; }
 	
 	var targetSpace = navi.space + maxMoveSpaces * direction;
+
+	// by default navi moves to just in front of goal
+
 
 	// execMove() does this bounds checking also,
 	// but navis are smart enough not to slam themselves into walls
 	if (targetSpace < 1) targetSpace = 1;
 	if (targetSpace > MAX_SPACE) targetSpace = MAX_SPACE;
 
+	// console.log("execMove " + (targetSpace - navi.space));
 	execMove(navi, targetSpace - navi.space);
 }
 
@@ -227,7 +258,7 @@ function execMove(navi, vector) {
 	navi.space = navi.space + vector;
 
 	var movedDistance = navi.space - originalSpace;
-	var reportDirection = movedDistance > 0 ? " left" : (movedDistance < 0 ? " right" : "")
+	var reportDirection = movedDistance > 0 ? " right" : (movedDistance < 0 ? " left" : "")
 	console.log(navi.name + " moves " + Math.abs(movedDistance) + reportDirection + " to space " + navi.space + ".");
 
 	return movedDistance;
@@ -249,7 +280,8 @@ function act(navi) {
 	// TODO: implement roles besides striker lol
 	if (canIShootOnGoal(navi)) {
 		shootOnGoal(navi);
-	} else if (doISee(navi, ball) && canIMove(navi)) {
+	} else {
+		// if (doISee(navi, ball) && canIMove(navi))
 		// functions with 'I' report the state of mind
 		// functions with verb only then *attempt* to execute. They call functions
 		// with exec, which decide if the navi can truly do the thing,
@@ -260,8 +292,6 @@ function act(navi) {
 		// we need to generate as text the command we will send to that machine
 		// which is the exec version of the function.
 		move(navi);
-	} else {
-		;
 	}
 }
 
@@ -298,19 +328,19 @@ function setupStarterPhrases(navi) {
 		selfAnnouncements: ["Word", "Here", "I'm here", "I am here", "Present", "I'm present", "I am present", "%N is here", "%N is present", "%N has arrived", "I have arrived"],
 		greetings: ["Hi", "Hello", "Greetings", "Salutations", "Yo", "Hey", "Heya", "Good day", "Good morning", "Good afternoon", "Good evening", "OBEY"],
 		random: [
-			"What's next",
-			"Why are we here",
-			"Why am I here",
+			"What's next?",
+			"Why are we here?",
+			"Why am I here?",
 			"I'm bored",
-			"When does the match start",
-			"When do we start",
-			"Is it my turn now",
-			"Am I winning",
-			"Am I winning yet",
-			"Are you winning",
-			"Are you winning yet",
-			"Can I go home",
-			"Can I go home now",
+			"When does the match start?",
+			"When do we start?",
+			"Is it my turn now?",
+			"Am I winning?",
+			"Am I winning yet?",
+			"Are you winning?",
+			"Are you winning yet?",
+			"Can I go home?",
+			"Can I go home now?",
 			"Let's get started",
 			"Let's get started already",
 			"Let's go",
@@ -329,7 +359,7 @@ function initializeAllNavis() {
 		navi.hp = 900;
 		navi.space = MAX_SPACE / 2;
 		navi.teamIdx = 0;
-		navi.vel = 0;
+		navi.priority = "E";
 		navi.pow = 0;
 		navi.end = 0;
 		navi.agi = 0;
@@ -356,6 +386,13 @@ function setupUniqueNaviTraits() {
 	flash = findNaviByName('flash');
 	heat = findNaviByName('heat');
 	wood = findNaviByName('wood');
+
+	wood.teamIdx = WOOD_TEAM_IDX;
+	air.teamIdx = WOOD_TEAM_IDX;
+	bubble.teamIdx = WOOD_TEAM_IDX;
+	quick.teamIdx = WOOD_TEAM_IDX;
+
+	quick.priority = "S";
 }
 
 function runAllNavis() {

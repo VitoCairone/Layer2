@@ -20,7 +20,7 @@ var stringFormGuideData = [
 `19 FireSwrd BFGNP Fire 100 "Cuts down column Range=1" ** Sword`,
 `20 AquaSwrd AMNOP Aqua 150 "Cuts down column Range=1" *** Sword`,
 `21 ElecSwrd EGLOS Elec 120 "Cuts down column Range=1" *** Sword`,
-`22 Muramasa CEGJK None ??? "Do damage = to your HP loss" ***** Sword Stealth`,
+`22 Muramasa CEGJK None ??? "Do damage = to your HP loss" ***** Sword Stealth SKIP_FOR_NOW SFN:ShadowMan`,
 `23 ShokWave CKLNP None 60 "Piercing ground wave" * Shot Ground Wave`,
 `24 SoniWave CDJMS None 80 "Piercing ground wave" ** Shot Ground Wave`,
 `25 DynaWave CEMRS None 100 "Piercing ground wave" *** Shot Ground Wave`,
@@ -99,10 +99,10 @@ var stringFormGuideData = [
 `98 Lockon1 CDHIL None 10 "Creates a lock on satellite!" * Drone`,
 `99 Lockon2 BEGHM None 15 "Creates a lock on satellite!" ** Drone`,
 `100 Lockon3 ADKNO None 20 "Creates a lock on satellite!" *** Drone`,
-`101 Candle1 CFIPS Fire 0 "Set candle & recover some HP" ** Obstacle:Area Recover`,
-`102 Candle2 BEGJL Fire 0 "Set candle & recover some HP" *** Obstacle:Area Recover`,
-`103 Candle3 ADHKM Fire 0 "Set candle & recover some HP" **** Obstacle:Area Recover`,
-`104 Anubis CLNQT None 0 "Set Anubis statue to reduce HP" ***** Obstacle:Area Poison`,
+`101 Candle1 CFIPS Fire 0 "Set candle & recover some HP" ** Obstacle Obstacle:Area Recover`,
+`102 Candle2 BEGJL Fire 0 "Set candle & recover some HP" *** Obstacle Obstacle:Area Recover`,
+`103 Candle3 ADHKM Fire 0 "Set candle & recover some HP" **** Obstacle Obstacle:Area Recover`,
+`104 Anubis CLNQT None 0 "Set Anubis statue to reduce HP" ***** Obstacle:Area Poison SKIP_FOR_NOW SFN:PharaohMan`,
 `105 IceCube ACILM Aqua 0 "Creates a ice cube Range=1" ** Obstacle`,
 `106 RockCube BEGMO None 0 "Creates 3 rock cubes randomly" *** Obstacle x3 Unaimed`,
 `107 BstrGard AGKNR None 0 "1-turn of MetGuard w/ B Btn." *** SKIP_FOR_NOW`,
@@ -111,12 +111,12 @@ var stringFormGuideData = [
 `110 BstrPnch CFIMQ None 0 "1-turn of GutsPnch with B Btn." **** SKIP_FOR_NOW`,
 `111 SloGauge HKNOQ None 0 "Slows down custom gauge" ** Pyschic SetTarget3 SlowGauge SKIP_FOR_NOW`,
 `112 FstGauge ACELN None 0 "Speeds up custom gauge" ** Psychic SetSelf3 FastGauge SKIP_FOR_NOW`,
-`113 Invis1 IJLOQ None 0 "Temporary immunity" ** Stealth Invis:1`,
-`114 Invis2 ACFJM None 0 "Temporary immunity" *** Stealth Invis:2`,
-`115 Invis3 BDHKN None 0 "Temporary immunity" **** Stealth Invis:3`,
-`116 Dropdown ABORT Wood 0 "Invisible until you attack!" ***** Stealth Invis:UntilAttack`,
-`117 Popup CDHKN None 0 "Invisible when not attacking!" ***** Stealth Invis:UntilStruck`,
-`118 IronBody CDLQR None 0 "30 seconds stoneshape Defense UP" ** HalfDamageTaken:3 Metal`,
+`113 Invis1 IJLOQ None 0 "Temporary immunity" ** Stealth Invis Lasts:1`,
+`114 Invis2 ACFJM None 0 "Temporary immunity" *** Stealth Invis Lasts:2`,
+`115 Invis3 BDHKN None 0 "Temporary immunity" **** Stealth Invis Lasts:3`,
+`116 Dropdown ABORT Wood 0 "Invisible until you attack!" ***** Stealth Invis Lasts:UntilAttack`,
+`117 Popup CDHKN None 0 "Invisible when not attacking!" ***** Stealth Invis Lasts:UntilStruck`,
+`118 IronBody CDLQR None 0 "30 seconds stoneshape Defense UP" ** HalfDamageTaken Lasts:3 Metal`,
 `119 Barrier DFMRS None 0 "Nullify 1 enemy attack" ** Guard`,
 `120 BblWrap1 CEGIM Aqua 0 "Aqua wall Comes back if damaged" ** Guard Refresh:1`,
 `121 BblWrap2 DFHKN Aqua 0 "Aqua wall Comes back if damaged" ** Guard Refresh:2`,
@@ -137,15 +137,94 @@ stringFormGuideData.forEach(guide => {
 	var endWords = end.split(" ");
 	var rarity = endWords[1];
 	var chipsets = endWords.slice(2);
+	if (chipsets.some(x => { return x == 'SKIP_FOR_NOW' })) {
+		return;
+	}
 	battleChips[name] = {
+		guideText: [null, guide, null, null, null, null, null], // BCC, 1, 2, 3, 4, 5, 6, NT
 		name: name,
 		codes: codes,
 		elem: elem,
 		dmg: dmg,
 		rarity: rarity,
 		text: quoted,
-		chipsets: chipsets
+		chipsets: chipsets,
+		inWorldCodes: "",
 	};
 })
 
-console.log(battleChips);
+function minOfArr(arr) { return arr.reduce((a, b) => Math.min(a, b), Infinity); }
+function maxOfArr(arr) { return arr.reduce((a, b) => Math.max(a, b), -Infinity); }
+
+// MVP laziness: use this very inefficient but result-correct method in a loop
+function addBattleChip() {
+	var minChipCount = minOfArr(allNavis.map(x => x.chips.folder.length));
+	var eligibleNavis;
+	var giveToFolder = true;
+	if ((minChipCount < 20)) {
+		eligibleNavis = allNavis.filter(x => x.chips.folder.length == minChipCount);
+	} else {
+		giveToFolder = false;
+		minChipCount = minOfArr(allNavis.map(x => x.chips.pack.length));
+		eligibleNavis = allNavis.filter(x => x.chips.pack.length == minChipCount);
+	}
+
+	var giveToNavi = sample(eligibleNavis);
+	var destination = giveToFolder ? giveToNavi.chips.folder : giveToNavi.chips.pack;
+
+	var maxChipCount = maxOfArr(battleChips.map(x => x.inWorldCodes.length));
+	var rarityMap = {"*": 1.0, "**": 0.5, "***": 0.3, "****": 0.15, "*****", 0.05}
+	var rarityDeficit = function(chip) { return maxChipCount * rarityMap[chip.rarity] - chip.inWorldCodes; }
+	var maxRarityDeficit = maxOfArr(battleChips.map(x => rarityDeficit(x));
+	var eligibleChips = battleChips.filter(x => rarityDeficit(x) === maxRarityDeficit);
+	var chip = sample(eligibleChips);
+	var code = sample(chip.codes);
+	destination.push({ name: chip.name, code: code });
+	console.log("Gave " + chip.name + " " + chip.code + " to " + giveToNavi.name);
+}
+
+// how many battle chips are needed for now: 20 per navi
+// target_count = 20
+// start with creating one of everything
+// thereafter, always create new chips from among the chips tied for most behind their rarity target
+// * = max (initially 1, increases by 1 whenever no chip is behind its rarity target)
+// ** = 50% max
+// *** = 30% max
+// **** = 15% max
+// ***** = 5% max
+
+
+/*
+SPEED
+The field is 256 spaces
+The hearths are at 8 and 248
+The goals are at 16 and 240
+The center is on 128
+
+Target:
+We would like the possible stomp score in a 3-hour game to be 10-0, so:
+
+Standard Class (E???) should cover the distance from mid to goal 15x in 3 hours, ergo in 12 mins (4x 3-min round)
+Super Class (S) should move 4x standard speed, ergo in 3 mins (1x 3-min round)
+
+4 minute rounds:
+128 / 4 = 32 (Class E)
+32 * 4 = 128 (Class S)
+
+Transitions E -> D -> C -> B -> A -> S = 5
+(128/32)^(1/5) = 1.32
+
+E: 32
+D: 42
+C: 55
+B: 77
+A: 100
+S: 128
+
+(wall time from mid => goal at speed X remains fixed across gauge changes)
+SlowGauge + Tommorow Bit = Increase Round Time
+FastGauge + Tomorrow Bit = Decrease Round Time
+FastGauge + The Resolution = Decrease Field Length
+SlowGauge + The Resolution = Increase Field Length
+
+*/
