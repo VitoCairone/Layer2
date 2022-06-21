@@ -197,10 +197,28 @@ function iHear(navi, quote, speaker = UnknownSpeaker, isDirect = false) {
 
 function calcHitrate(navi, other) {
 	var map = {"C": 0, "B": 1, "A": 2, "S": 3};
-	return 0.75*(1.0+0.085*(map[navi.accuracy] - map[other.dodging]));
+	return 0.75 * (1.0 + 0.085 * (map[navi.accuracy] - map[other.dodging]));
 }
 
-function hasBall(navi) { return ball.navi === navi; }
+function hasBall(navi) { 
+	console.log("DEBUG: Just kidding! Don't use hasBall. has is a very complicated social verb.");
+	console.log("DEBUG: Use canGetToBall, canKickBall, canDribbleBall")
+}
+
+function bound(x, min, max) { return Math.max(Math.min(x, max), min); }
+function stageBound(x) { return bound(x, 1, MAX_SPACE); }
+
+function canGetToBall(navi) {
+	var onTheRight = navi.space > ball.space;
+	var strikerSpace = ball.space + onTheRight ? 1 : -1;
+	return distanceBetween(navi, strikerSpace) <= navi.remainingRoundMoveSpaces;
+}
+
+function canIGetToBall(navi) { /* TODO: fix this */ return canGetToBall(navi); }
+
+function canKickBall(navi) { return distanceBetween(navi, ball) <= 1; }
+
+function canIKickBall(navi) { /* TODO: fix this */ return canKickBall(navi.m); }
 
 function calcMaxMoveSpaces(navi) {
 	var threeMinuteRoundMap = {
@@ -213,11 +231,28 @@ function calcMaxMoveSpaces(navi) {
 	};
 
 	var spaces = threeMinuteRoundMap[navi.priority];
-	if (hasBall(navi) && spaces > 60) {
-		spaces = 60;
+	if (canKickBall(navi)) {
+		spaces = 70;
 	}
 
 	return Math.round(spaces * world.roundSeconds / (3 * 60), 0);
+}
+
+function getKickAccuracy(navi) {
+	var floorMap = { "C": 0.5, "B": 0.6, "A": 0.7, "S": 0.8 };
+	var perfectRate = { "C": 16.0/20, "B": 17.0/20, "A": 18.0/20, "S": 19.0/20 };
+
+	if (Math.random < perfectRate[navi.accuracy]) return 1.0;
+
+	var floor = floorMap[navi.accuracy];
+	var span = 1.0 - floor;
+	return floor + Math.random() * span;
+}
+
+function calcMaxKickSpaces(navi) {
+	// kick spaces should be higher than speed at low tiers but lower than speed at max tiers
+	// go from 40 min to 65 max, so max kick < max dribble in air
+	var threeMinuteRoundSpaces = Math.max(Math.min(65, 35 + (navi.baseMB - 110) / 2), 5);
 }
 
 function debug(x) { console.log(x); }
@@ -354,16 +389,14 @@ function setupStarterPhrases(navi) {
 function initializeAllNavis() {
 	allNavis.forEach((navi, i) => {
 		navi.nextRoundSecond = world.roundSeconds * (i+1.0)/allNavis.length;
-		// console.log("set " + navi.name + " round seconds to " + navi.nextRoundSecond)
-		navi.maxHp = 900; 
-		navi.hp = 900;
+		// console.log("set " + navi.name + " round seconds to " + navi.nextRoundSecond) 
 		navi.space = MAX_SPACE / 2;
 		navi.teamIdx = 0;
+		navi.maxHP = 400;
+		navi.baseMB = 110;
+		navi.accuracy = "C";
+		navi.dodging = "C";
 		navi.priority = "E";
-		navi.pow = 0;
-		navi.end = 0;
-		navi.agi = 0;
-		navi.dex = 0;
 		navi.m = {
 			people: {},
 			scene: {
@@ -373,6 +406,9 @@ function initializeAllNavis() {
 		navi.m.people[navi] = makeMPerson();
 		navi.m.scene.people[navi] = makeMPerson();
 
+		// TODO: method to copy all attribs from navi onto naviM
+		// with information & attention filtering for uses besides setup
+		
 		setupStarterPhrases(navi);
 	});
 }
