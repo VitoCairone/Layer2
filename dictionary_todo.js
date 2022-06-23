@@ -2099,3 +2099,83 @@ dash	0, pos: "noun, verb"},
 cyberspace	0, pos: "noun"},
 minus	0, pos: "verb, adjective"}
 ]
+
+
+
+// todo: make this a class or something
+// sentanceStruct{ who: "", didWhat: "", how: "", how_much: "", when: ""}
+// probably in addition to tripart processing
+
+// var textParser = {
+// 	textParse: function(navi, text, speaker = UnknownSpeakr, isDirect = false, tone = null) {
+// 		var sens = [];
+// 		var len = text.length;
+// 		var str = "";
+// 		var endRun = "";
+// 		text.forEach((c, i) => {
+// 			if (c == '.') {
+// 				// check if this is part of ...
+// 				if ((i > 0 && c[i-1] == '.') || (i < len - 1 && c[i+1] == '.')) {
+// 					str += c;
+// 				} else {
+// 					sens.push(str + " _ .")
+// 					str.length = 0;
+// 				}
+// 			} else if (c == '!' || c == '?') {
+// 				// check for non-terminal of run
+// 				if (i < len - 1 && (c[i+1] == '!' || c[i+1] == '?')) {
+// 					endRun += c;
+// 				} else {
+// 					sens.push(str + " " + (endRun == "" ? "_" : endRun) + " c")
+// 				}
+// 			}
+// 		});
+
+// 		this.sens = sens;
+// 		this.parsedSens = [];
+// 		this.naviM = navi.m;
+
+// 		sens.forEach(sen => { this.parsedSens.push(this.senParse(sen)) });
+// 	},
+
+// 	senParse: function() {
+// 		// if (startOfSenAnswersOpenQuestion()) {
+// 		// 	IExpectTo(answerOpenQuestionWithStartOfSen()); // ???
+// 		// } else {
+// 		// 	if (senBeginsWithAPersonsName()) {
+// 		// 		if (!(senUsesLinkingVerb())) senIsDirectedAt(personsNameAtSenBeginning());
+// 		// 	}
+// 		// }
+
+// 		var words = sentance.split(" "); // todo: remove last two
+// 		var wordRecs = words.map(word => {
+// 			return {
+// 				word: word,
+// 				coreWord: coreLookup(word)
+// 			}
+// 		});
+// 	}
+// };
+
+
+/*
+
+one-line litanies for PharaohMan.EXE's zombie navis
+
+OBEY
+
+SIFT THE PIECES
+
+FIND THE CROWN
+
+RESTORE THE GLORY
+
+THE KING REWARDS
+
+bonus1~
+FOREVER LOYAL
+
+bonus2~
+HIS WISDOM IS LIMITLESS
+
+*/

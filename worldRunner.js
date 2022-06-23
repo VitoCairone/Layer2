@@ -1,11 +1,9 @@
-
-
 var world = { seconds: 0, roundSeconds: 60 };
+
+var MAX_SPACE = 256;
 
 var METAL_TEAM_IDX = 0;
 var WOOD_TEAM_IDX = 1;
-
-var MAX_SPACE = 256;
 
 						  // Metal, Wood
 var TEAM_ATTACK_DIRECTION = [-1, 1];
@@ -27,7 +25,7 @@ var allNavis = [
 	{ name: 'WoodMan.EXE', chips: { folder: [], pack: [] } }
 ];
 
-var ball = { space: MAX_SPACE / 2, navi: null };
+var ball = { space: MAX_SPACE / 2 };
 
 // ======= START Chips Section =======
 
@@ -44,27 +42,27 @@ var stringFormGuideData = [
 `10 LilBomb BDGOT None 50 "Throw a bomb! Depth=3" * Toss Splash-wide`,
 `11 CrosBomb BDHJL None 70 "Cross bomb Depth=3" ** Toss Splash-X`,
 `12 BigBomb BGOST None 90 "Bomb with a big boom Depth=3" **** Toss Splash-around`,
-`13 Sword BKLPS None 80 "Cut down enemies! Range=1" * Sword`,
-`14 WideSwrd CKMNS None 80 "Cut down column! Range=1" * Sword`,
-`15 LongSwrd DENOS None 80 "Cut down enemies! Range=2" ** Sword`,
-`16 FtrSword BKLPS None 100 "Warrior's sword Range=3" *** Sword`,
-`17 KngtSwrd BCEGH None 150 "Knight's sword Range=3" **** Sword`,
-`18 HeroSwrd BDFIJ None 200 "Legendary sword Range=3" ***** Sword`,
-`19 FireSwrd BFGNP Fire 100 "Cuts down column Range=1" ** Sword`,
-`20 AquaSwrd AMNOP Aqua 150 "Cuts down column Range=1" *** Sword`,
-`21 ElecSwrd EGLOS Elec 120 "Cuts down column Range=1" *** Sword`,
+`13 Sword BKLPS None 80 "Cut down enemies! Range=1" * R1 Sword`,
+`14 WideSwrd CKMNS None 80 "Cut down column! Range=1" * R1 Wide Sword`,
+`15 LongSwrd DENOS None 80 "Cut down enemies! Range=2" ** R2 Sword`,
+`16 FtrSword BKLPS None 100 "Warrior's sword Range=3" *** R3 Sword`,
+`17 KngtSwrd BCEGH None 150 "Knight's sword Range=3" **** R3 Sword`,
+`18 HeroSwrd BDFIJ None 200 "Legendary sword Range=3" ***** R3 Sword`,
+`19 FireSwrd BFGNP Fire 100 "Cuts down column Range=1" ** R1 Wide Sword`,
+`20 AquaSwrd AMNOP Aqua 150 "Cuts down column Range=1" *** R1 Wide Sword`,
+`21 ElecSwrd EGLOS Elec 120 "Cuts down column Range=1" *** R1 Wide Sword`,
 `22 Muramasa CEGJK None ??? "Do damage = to your HP loss" ***** Sword Stealth SKIP_FOR_NOW SFN:ShadowMan`,
 `23 ShokWave CKLNP None 60 "Piercing ground wave" * Shot Ground Wave`,
 `24 SoniWave CDJMS None 80 "Piercing ground wave" ** Shot Ground Wave`,
 `25 DynaWave CEMRS None 100 "Piercing ground wave" *** Shot Ground Wave`,
 `26 FireTowr EFLMT Fire 100 "Fire that can move up & down" ** Tower Wave`,
-`27 AquaTowr ACGHR Aqua 120 "Aqua that can move up & down" ** Tower`,
-`28 WoodTowr BCHKN Wood 140 "Log that can move up & down" ** Tower`,
-`29 Quake1 AEHKQ None 90 "Cracks a panel Depth=3" * Airstrike Shatter`,
-`30 Quake2 BCIKQ None 120 "Cracks a panel Depth=3" ** Airstrike Shatter`,
-`31 Quake3 CDHMQ None 150 "Cracks a panel Depth=3" *** Airstrike Shatter`,
-`32 GutsPnch BHMNT None 60 "Knocks stuff over Range=1" * Brawl`,
-`33 IcePunch BHMNT Aqua 80 "Knocks stuff over Range=1" ** Brawl`,
+`27 AquaTowr ACGHR Aqua 120 "Aqua that can move up & down" ** Tower Wave`,
+`28 WoodTowr BCHKN Wood 140 "Log that can move up & down" ** Tower Wave`,
+`29 Quake1 AEHKQ None 90 "Cracks a panel Depth=3" * R3 Airstrike Shatter`,
+`30 Quake2 BCIKQ None 120 "Cracks a panel Depth=3" ** R3 Airstrike Shatter`,
+`31 Quake3 CDHMQ None 150 "Cracks a panel Depth=3" *** R3 Airstrike Shatter`,
+`32 GutsPnch BHMNT None 60 "Knocks stuff over Range=1" * R1 Push`,
+`33 IcePunch BHMNT Aqua 80 "Knocks stuff over Range=1" ** R1 Push`,
 `34 Dash BDGLO None 50 "Knock over all in your path!" * Dash`,
 `35 Howitzer ACGHO None 150 "Breaks panels Depth=3" **** Toss Shatter2 Breaker`,
 `36 TriArrow ABCDE None 40 "Fires a 3-arrow burst" * Shot x3 Metal`,
@@ -95,9 +93,9 @@ var stringFormGuideData = [
 `61 Drain2 ACHNT None 70 "Charge to drain HP from enemy" ** Dash Drain`,
 `62 Drain3 AEFLQ None 90 "Charge to drain HP from enemy" *** Dash Drain`,
 `63 BodyBurn EFKMN Fire 100 "Engulf all around you in flames!" **** Dash`,
-`64 X-Panel1 BDGLS None "Erase 1 panel Range=1" ** Terrain:Broken`,
-`65 X-Panel3 BDGLS None "Erase column Range=1" *** Terrain:Broken`,
-`66 Hammer AFIMQ None 100 "Breaks cubes Range=1" ** Melee Breaker`,
+`64 X-Panel1 BDGLS None "Erase 1 panel Range=1" ** R1 Terrain:Broken`,
+`65 X-Panel3 BDGLS None "Erase column Range=1" *** R1 Terrain:Broken`,
+`66 Hammer AFIMQ None 100 "Breaks cubes Range=1" ** R1 Breaker`,
 `67 MetGuard ACEGL None "Hold A Btn for 3 sec defense!" * Guard`,
 `68 IronShld ABORT None "Hold btn. to create shield!" ** Guard Metal`,
 `69 Recov10 ACEGL None -10 "Recover 10HP" * Recover`,
@@ -108,7 +106,7 @@ var stringFormGuideData = [
 `74 Recov150 ACEGL None -150 "Recover 150HP" ** Recover`,
 `75 Recov200 ACEGL None -200 "Recover 200HP" *** Recover`,
 `76 Recov300 ACEGL None -300 "Recover 300HP" **** Recover`,
-`77 Steal AELPS None 0 "Steal left column of enemy area" *** Steal:Terrain`,
+`77 Steal AELPS None 0 "Steal left column of enemy area" *** R1 Wide Steal:Terrain`,
 `78 Geddon1 FHJLN None 0 "All panels become cracked!" *** Area Terrain:Cracked`,
 `79 Geddon2 ABEIK None 0 "Erases all empty panels" **** Area Terrain:Broken`,
 `80 Escape FHJLN None 0 "Escape from most enemies" *** Stealth`,
@@ -142,23 +140,23 @@ var stringFormGuideData = [
 `108 BstrBomb DHJOT None 0 "1-turn of MiniBomb w/ B Btn." **** SKIP_FOR_NOW`,
 `109 BstrSwrd BELPS None 0 "1-turn use of Sword with B Btn." **** SKIP_FOR_NOW`,
 `110 BstrPnch CFIMQ None 0 "1-turn of GutsPnch with B Btn." **** SKIP_FOR_NOW`,
-`111 SloGauge HKNOQ None 0 "Slows down custom gauge" ** Pyschic SetTarget3 SlowGauge SKIP_FOR_NOW`,
-`112 FstGauge ACELN None 0 "Speeds up custom gauge" ** Psychic SetSelf3 FastGauge SKIP_FOR_NOW`,
+`111 SloGauge HKNOQ None 0 "Slows down custom gauge" ** Pyschic Set:Slow Lasts:3 SKIP_FOR_NOW`,
+`112 FstGauge ACELN None 0 "Speeds up custom gauge" ** Psychic Set:Fast Lasts:3 SKIP_FOR_NOW`,
 `113 Invis1 IJLOQ None 0 "Temporary immunity" ** Stealth Invis Lasts:1`,
 `114 Invis2 ACFJM None 0 "Temporary immunity" *** Stealth Invis Lasts:2`,
 `115 Invis3 BDHKN None 0 "Temporary immunity" **** Stealth Invis Lasts:3`,
 `116 Dropdown ABORT Wood 0 "Invisible until you attack!" ***** Stealth Invis Lasts:UntilAttack`,
 `117 Popup CDHKN None 0 "Invisible when not attacking!" ***** Stealth Invis Lasts:UntilStruck`,
-`118 IronBody CDLQR None 0 "30 seconds stoneshape Defense UP" ** HalfDamageTaken Lasts:3 Metal`,
-`119 Barrier DFMRS None 0 "Nullify 1 enemy attack" ** Guard`,
-`120 BblWrap1 CEGIM Aqua 0 "Aqua wall Comes back if damaged" ** Guard Refresh:1`,
-`121 BblWrap2 DFHKN Aqua 0 "Aqua wall Comes back if damaged" ** Guard Refresh:2`,
-`122 BblWrap3 ABLQR Aqua 0 "Aqua wall Comes back if damaged" *** Guard Refresh:3`,
+`118 IronBody CDLQR None 0 "30 seconds stoneshape Defense UP" ** Guard HalfDamageTaken Lasts:3 Metal`,
+`119 Barrier DFMRS None 0 "Nullify 1 enemy attack" ** Guard Lasts:UntilStruck`,
+`120 BblWrap1 CEGIM Aqua 0 "Aqua wall Comes back if damaged" ** Guard Lasts:UntilStruck Refresh:1`,
+`121 BblWrap2 DFHKN Aqua 0 "Aqua wall Comes back if damaged" ** Guard Lasts:UntilStruck Refresh:2`,
+`122 BblWrap3 ABLQR Aqua 0 "Aqua wall Comes back if damaged" *** Guard Lasts:UntilStruck Refresh:3`,
 `123 LeafShld CDFKQ Wood 0 "Turns dmg from 1 hit into HP" *** Guard Recover`,
-`124 AquaAura DELRS Aqua 0 "Null<10dmg Weak vs. [Elec]" ** Aura:10`,
-`125 FireAura BGINT Fire 0 "Null<40dmg Weak vs. [Aqua]" *** Aura:40`,
-`126 WoodAura CFJOQ Wood 0 "Null<80dmg Weak vs. [Fire]" **** Aura:80`,
-`127 LifeAura AHKMP None 0 "Negate all attacks w/ damage<100" ***** Aura:100`
+`124 AquaAura DELRS Aqua 0 "Null<10dmg Weak vs. [Elec]" ** Aura:10:Aqua`,
+`125 FireAura BGINT Fire 0 "Null<40dmg Weak vs. [Aqua]" *** Aura:40:Fire`,
+`126 WoodAura CFJOQ Wood 0 "Null<80dmg Weak vs. [Fire]" **** Aura:80:Wood`,
+`127 LifeAura AHKMP None 0 "Negate all attacks w/ damage<100" ***** Aura:100:None`
 ]
 
 var allBattleChips = {};
@@ -214,7 +212,7 @@ function addBattleChip() {
 	var code = sample(chip.codes);
 	destination.push({ name: chip.name, code: code });
 	chip.codes += code;
-	console.log("Gave " + chip.name + " " + code + " to " + giveToNavi.name);
+	// console.log("Gave " + chip.name + " " + code + " to " + giveToNavi.name);
 }
 
 for (var i = 0; i < allNavis.length * 30; i++) {
@@ -233,61 +231,6 @@ function rangeSpacesFromSet(battleChip) {
 }
 
 // ===== END Chips Section =====
-
-// todo: make this a class or something
-// sentanceStruct{ who: "", didWhat: "", how: "", how_much: "", when: ""}
-// probably in addition to tripart processing
-
-var textParser = {
-	textParse: function(navi, text, speaker = UnknownSpeakr, isDirect = false, tone = null) {
-		var sens = [];
-		var len = text.length;
-		var str = "";
-		var endRun = "";
-		text.forEach((c, i) => {
-			if (c == '.') {
-				// check if this is part of ...
-				if ((i > 0 && c[i-1] == '.') || (i < len - 1 && c[i+1] == '.')) {
-					str += c;
-				} else {
-					sens.push(str + " _ .")
-					str.length = 0;
-				}
-			} else if (c == '!' || c == '?') {
-				// check for non-terminal of run
-				if (i < len - 1 && (c[i+1] == '!' || c[i+1] == '?')) {
-					endRun += c;
-				} else {
-					sens.push(str + " " + (endRun == "" ? "_" : endRun) + " c")
-				}
-			}
-		});
-
-		this.sens = sens;
-		this.parsedSens = [];
-		this.naviM = navi.m;
-
-		sens.forEach(sen => { this.parsedSens.push(this.senParse(sen)) });
-	},
-
-	senParse: function() {
-		// if (startOfSenAnswersOpenQuestion()) {
-		// 	IExpectTo(answerOpenQuestionWithStartOfSen()); // ???
-		// } else {
-		// 	if (senBeginsWithAPersonsName()) {
-		// 		if (!(senUsesLinkingVerb())) senIsDirectedAt(personsNameAtSenBeginning());
-		// 	}
-		// }
-
-		var words = sentance.split(" "); // todo: remove last two
-		var wordRecs = words.map(word => {
-			return {
-				word: word,
-				coreWord: coreLookup(word)
-			}
-		});
-	}
-};
 
 function startsWithCaseInsensitive(subject, pattern) {
 	// not unicode safe
@@ -427,26 +370,17 @@ function canKickBall(navi) { return distanceBetween(navi, ball) <= 1; }
 function canIKickBall(navi) { /* TODO: fix this */ return canKickBall(navi.m); }
 
 function calcMaxMoveSpaces(navi) {
-	var threeMinuteRoundMap = {
-		"E": 32,
-		"D": 42,
-		"C": 55,
-		"B": 77,
-		"A": 99,
-		"S": 128
-	};
+	var threeMinuteRoundMap = { "E": 32, "D": 42, "C": 55, "B": 77, "A": 99, "S": 128 };
 
 	var spaces = threeMinuteRoundMap[navi.priority];
-	if (canKickBall(navi)) {
-		spaces = 70;
-	}
+	// if (canKickBall(navi)) { spaces = 70; }
 
 	return Math.round(spaces * world.roundSeconds / (3.0 * 60), 0);
 }
 
 function getKickAccuracy(navi) {
 	var floorMap = { "C": 0.5, "B": 0.6, "A": 0.7, "S": 0.8 };
-	var perfectRate = { "C": 16.0/20, "B": 17.0/20, "A": 18.0/20, "S": 19.0/20 };
+	var perfectRate = { "C": 0.8, "B": 0.85, "A": 0.9, "S": 0.95 };
 
 	if (Math.random < perfectRate[navi.accuracy]) return 1.0;
 
@@ -505,6 +439,85 @@ function execMove(navi, vector) {
 	console.log(navi.name + " moves " + Math.abs(movedDistance) + reportDirection + " to space " + navi.space + ".");
 
 	return movedDistance;
+}
+
+// function removeItem(arr, item) {
+// 	var i = arr.findIndex(arr, x => x == item);
+// 	if (i >= 0) { arr.splice(i, 1); }
+// 	return arr;
+// }
+
+function moveItemFromTo(item, fromArr, toArr) {
+	var i = arr.findIndex(arr, x => x == item);
+	if (i == -1) return false;
+	fromArr.splice(i, 1);
+	toArr.push(item);
+	return true;
+}
+
+function amStandingOn(navi, terrain) { return false; }
+
+function execChip(navi, chip, target, isLethalIntent) {
+	var code = chip.code;
+	var dmg = chip.dmg;
+	var elem = chip.elem;
+	var chipsets = chip.chipsets;
+
+	moveItemFromTo(chip, navi.chips.hand, navi.chips.used);
+	if (navi.chips.folder.length) { moveItemFromTo(chip, navi.chips.folder, navi.chips.hand); }
+
+	// FUTURE: pronouns of others is M data, perhaps battle report should adjust to use listener's M terms?
+	// apply whatever the rule ends up being for navis' names in this regard also to their pronouns
+	var poss = { "He": "his", "She": "her", "They": "their"}[navi.m.pronoun];
+
+	var reportStart = navi.name + uses + " " + poss + " " + chip.name + " chip on " + target.name;
+
+	var hitrate = calcHitrate(navi, target);
+
+	if (Math.random() > hitrate) {
+		var missRates = {"C": 0.2, "B": 0.1, "A": 0.05, "S": 0.0 };
+		if (Math.random() < missRates[navi.accuracy]) {
+			console.log(reportStart + ", but misses!");
+		} else {
+			console.log( + ", but " + target.name + " dodges!");
+		}
+		return;
+	}
+
+	var elemFactor = 1.0;
+	if (elem == "Elec") {
+		if (amStandingOn(target, "Metal") || amStandingOn(target, "Ice")) elemFactor += 0.5;
+		if (target.elem == "Aqua") elemFactor += 0.5;
+	} else if (elem == "Wood") {
+		if (target.elem == "Elec") elemFactor += 0.5;
+	} else if (elem == "Aqua") {
+		if (target.elem == "Fire") elemFactor += 0.5;
+	} else if (elem == "Fire") {
+		if (target.elem == "Wood") elemFactor += 0.5;
+	}
+
+	var damage = chip.dmg * elemFactor;
+
+	// apply the damage
+	target.hp -= damage;
+
+	// report the damage
+	var ending = (elemFactor > 1.0 ? "!!" : ".")
+	console.log( " and deals " + damage + " damage" + ending);
+
+ 	// check for KO and report
+ 	var didKOTarget = (target.hp <= 0);
+
+ 	if (didKOTarget) {
+ 		bootToTimeout(navi);
+		console.log(navi.name + " has booted " + target.name + " !");
+		console.log("But not really because it's not built yet haha.");
+		navi.kosEarned.push(target);
+		target.koedBy.push(navi);
+		target.hp = maxHP;
+ 	}
+
+	// report
 }
 
 function canIShootOnGoal(navi) {
@@ -611,6 +624,8 @@ function initializeAllNavis() {
 				people: {}
 			}
 		}
+		navi.hp = navi.maxHP;
+		navi.m.pronoun = "He"
 		navi.m.people[navi] = makeMPerson();
 		navi.m.scene.people[navi] = makeMPerson();
 
